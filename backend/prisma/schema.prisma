@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TipoUsuario {
+  COMUM
+  ADMIN
+}
+
+model Usuario {
+  id              Int       @id @default(autoincrement())
+  nome            String
+  apelido         String?
+  email           String    @unique
+  senha           String
+  data_nascimento DateTime
+  tipoUsuario     TipoUsuario @default(COMUM)
+  status          Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  //relacionamentos
+  avaliacoes      Avaliacao[]
+}
+
+model Filme {
+  id              Int @id @default(autoincrement())
+  nome            String
+  diretor         String
+  anoLancamento   Int        
+  duracao         Int
+  produtora       String
+  classificacao   String
+  poster          String
+
+  //relacionamentos
+  avaliacoes      Avaliacao[]
+  generos         Genero_filme[]
+}
+
+model Avaliacao {
+  idUsuario     Int
+  idFilme       Int 
+  nota          Int
+  comentario    String?
+
+  //refenciando id dos relacionamentos
+  usuario       Usuario @relation(fields: [idUsuario], references: [id])
+  filme         Filme @relation(fields: [idFilme], references: [id])
+
+  @@id([idUsuario, idFilme])
+}
+
+model Genero {
+  id          Int @id @default(autoincrement())
+  descricao   String
+
+  //relacionamentos
+  generos_filme Genero_filme[]
+}
+
+model Genero_filme {
+  idGenero Int
+  idFilme  Int
+
+  //refenciando id dos relacionamentos
+  genero   Genero @relation(fields: [idGenero], references: [id])
+  filme    Filme @relation(fields: [idFilme], references: [id])
+
+  @@id([idGenero, idFilme])
+}
+
