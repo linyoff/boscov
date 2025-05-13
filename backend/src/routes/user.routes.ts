@@ -14,7 +14,7 @@ router.post("/register", async (req: Request, res: Response) => {
 
 router.post("/login", async (req: Request, res: Response) => {
     try {
-        await userController.createUser(req, res);
+        await userController.login(req, res);
     } catch (error) {
         console.error(error);
     }
