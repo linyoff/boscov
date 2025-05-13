@@ -1,4 +1,8 @@
 @import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 
 :root {
   --primary: #262a32;
@@ -7,6 +11,11 @@
   --textPrimary: #ffffff;
   --textSecondary: #9c9791;
 }
+
+html, body {
+  height: 100%;
+}
+
 
 @layer utilities {
   .bg-primary {
