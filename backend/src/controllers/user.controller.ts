@@ -22,7 +22,7 @@ export class UserController {
         try {
             const { email, senha } = req.body;
             const token = await userService.login(email, senha);
-            return res.status(200).json({message: "Login bem sucedido"});
+            return res.status(200).json({message: "Login bem sucedido", token});
         } catch (error: any) {
             return res.status(400).json({ error: error.message });
         }

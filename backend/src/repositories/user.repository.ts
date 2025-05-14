@@ -19,5 +19,21 @@ export class UserRepository {
         return prisma.user.findUnique({where: {id}});
     }
 
+    async update(id: number, dados: Partial<Prisma.UserUpdateInput>) {
+    return prisma.user.update ({
+      where: {id},
+      data: {
+        ...dados,
+        updatedAt: new Date()
+      }
+    });
+  }
+
+  async updatePassword(userId: number, newPassword: string) {
+    return prisma.user.update({
+      where: { id: userId },
+      data: { senha: newPassword },
+    });
+  }
 }
 
