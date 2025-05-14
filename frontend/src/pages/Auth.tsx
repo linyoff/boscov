@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import InputField from "../components/InputField";
 import Button from "../components/CustomButton";
 import { LogoPrimary } from "../components/Logo";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export default function Auth() {
   const [form, setForm] = useState({
@@ -14,11 +15,20 @@ export default function Auth() {
     confirmaSenha: ""
   });
   const [isLogin, setIsLogin] = useState(true);
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
+
+  //verificando se o usuario ja esta logado
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate("/");
+    }
+  }, []);
 
   const handleRegister = async () => {
     if (form.senha !== form.confirmaSenha) {
@@ -54,6 +64,12 @@ export default function Auth() {
         email: form.email,
         senha: form.senha
       })
+
+      const { token } = res.data;
+      console.log("Token recebido:", res.data);
+      //salavndo token no localStorage
+      localStorage.setItem("token", token);
+      navigate("/home");
       alert("Usuario logado!");
       return res.data;
     } catch (error) {
