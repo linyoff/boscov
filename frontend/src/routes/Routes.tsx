@@ -6,8 +6,8 @@ import Auth from "../pages/Auth";
 export default function AppRoutes() {
     return (
         <Routes>
-            <Route path="/te" element={<Home/>} />
-            <Route path="/" element={<Auth/>} />
+            <Route path="/" element={<Home/>} />
+            <Route path="/auth" element={<Auth/>} />
         </Routes>
     )
 }

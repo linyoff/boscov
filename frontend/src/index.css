@@ -6,8 +6,8 @@
 
 :root {
   --primary: #262a32;
-  --secondary: #3e56a0;
-  --tertiary: #7792ad;
+  --secondary: #7792ad;
+  --tertiary: #3e56a0;
   --textPrimary: #ffffff;
   --textSecondary: #9c9791;
 }
@@ -20,6 +20,10 @@ html, body {
 @layer utilities {
   .bg-primary {
     background-color: var(--primary);
+  }
+
+  .hover\:bg-tertiary:hover {
+    background-color: var(--tertiary);
   }
 
   .bg-secondary {

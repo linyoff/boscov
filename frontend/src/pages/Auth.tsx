@@ -92,7 +92,7 @@ export default function Auth() {
 
       <div className="w-full flex justify-center m-30 rounded-3xl">
         {/* lado esquerdo do form */}
-        <div className="flex flex-col md:flex w-1/2 bg-tertiary justify-center items-center rounded-tl-[20px] rounded-bl-[20px]">
+        <div className="flex flex-col md:flex w-1/2 bg-secondary justify-center items-center rounded-tl-[20px] rounded-bl-[20px]">
           <LogoPrimary size={300} />
           <p className="text-2xl text-center mt-2">Já tem uma conta?</p>
           <Button className="w-[50%] m-3" onClick={() => isLogin ? setIsLogin(false) : setIsLogin(true)}>{isLogin ? "Fazer Cadastro" : "Fazer Login"}</Button>
@@ -176,7 +176,7 @@ export default function Auth() {
               )}
 
 
-              <Button type="submit" className="w-full">{isLogin ? "Login" : "Cadastrar"}</Button>
+              <Button type="submit" className="w-full bg-primary">{isLogin ? "Login" : "Cadastrar"}</Button>
 
             </form>
           </div>
