@@ -15,7 +15,7 @@ const Button: React.FC<ButtonProps> = ({
         <button
             onClick={onClick}
             type={type}
-            className={`p-3 bg-primary text-primary rounded-lg focus:outline-none cursor-pointer ${className}`}
+            className={`${className} p-3 bg-secondary text-primary rounded-lg hover:bg-tertiary focus:outline-none cursor-pointer `}
         >
             {children}
         </button>
