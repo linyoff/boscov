@@ -6,12 +6,20 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model PasswordRecoveryToken { 
+  id         String   @id @default(uuid())
+  token      String   @unique
+  user       Usuario     @relation(fields: [userId], references: [id]) 
+  userId     Int     
+  createdAt  DateTime @default(now())
+  expiredAt  DateTime 
 }
 
 enum TipoUsuario {
@@ -33,6 +41,7 @@ model Usuario {
 
   //relacionamentos
   avaliacoes      Avaliacao[]
+  passwordRecoveryTokens PasswordRecoveryToken[] 
 }
 
 model Filme {

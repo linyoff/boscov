@@ -6,30 +6,65 @@ const router = Router();
 const userController = new UserController();
 
 router.post("/register", async (req: Request, res: Response) => {
-    try {
-        await userController.createUser(req, res);
-    } catch (error) {
-        console.error(error);
-    }
+  try {
+    await userController.createUser(req, res);
+  } catch (error) {
+    console.error(error);
+  }
 });
 
 router.post("/login", async (req: Request, res: Response) => {
-    try {
-        await userController.login(req, res);
-    } catch (error) {
-        console.error(error);
-    }
-});
-
-router.get("/me", authenticateToken, async (req: Request, res: Response) => {
   try {
-    const user = res.locals.user;
-    res.json({ message: "Usuário autenticado", user });
+    await userController.login(req, res);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Erro ao buscar perfil" });
   }
 });
+
+router.post("/logout", async (req: Request, res: Response) => {
+  try {
+    await userController.logout(req, res);
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+router.post("/recuperar-senha", async (req: Request, res: Response) => {
+  try {
+    await userController.requestPasswordReset(req, res);
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+router.post("/redefinir-senha", async (req: Request, res: Response) => {
+  try {
+    await userController.resetPassword(req, res);
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+router.get("/logado", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    await userController.getLoggedUser(req, res);
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+router.put(
+  "/edit/:id",
+  authenticateToken,
+  async (req: Request, res: Response) => {
+    try {
+      await userController.update(req, res);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+);
+
 
 
 export default router;
