@@ -53,10 +53,7 @@ router.get("/logado", authenticateToken, async (req: Request, res: Response) => 
   }
 });
 
-router.put(
-  "/edit/:id",
-  authenticateToken,
-  async (req: Request, res: Response) => {
+router.put("/update/:id", authenticateToken, async (req: Request, res: Response) => {
     try {
       await userController.update(req, res);
     } catch (error) {
