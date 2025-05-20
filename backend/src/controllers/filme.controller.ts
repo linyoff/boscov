@@ -8,7 +8,7 @@ export class FilmeController {
     createFilme = async (req: Request, res: Response) => {
         try {
             const filme = await filmeService.createFilme(req.body);
-            return res.status(201).json({ message: "Filme criado com sucesso" });
+            return res.status(201).json({ message: "Filme criado com sucesso", filme});
         } catch (err: any) {
             return res.status(400).json({ error: err.message });
         }
