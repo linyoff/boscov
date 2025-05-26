@@ -1,5 +1,5 @@
 import e, { Router, Request, Response } from "express";
-import { GeneroFilmeController } from "../controllers/genero_filme.controller";
+import { GeneroFilmeController } from "../controllers/generoFilme.controller";
 
 const router = Router();
 const generoFilmeController = new GeneroFilmeController();

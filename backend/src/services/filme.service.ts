@@ -5,7 +5,15 @@ const filmeRepository = new FilmeRepository();
 export class FilmeService {
 
     async createFilme(data: any) {
-        return await filmeRepository.createFilme(data);
+        const { generosIds, ...filmeData } = data;
+
+        const filme = await filmeRepository.createFilme(filmeData);
+
+        if (generosIds && generosIds.length > 0) {
+            await filmeRepository.createGeneroFilmeRelations(filme.id, generosIds);
+        }
+
+        return filme;
     }
 
     async getAllFilmes() {
@@ -22,6 +30,10 @@ export class FilmeService {
 
     async updateFilme(id: number, data: any) {
         return await filmeRepository.updateFilme(id, data);
+    }
+
+    async updateGenerosFilme(idFilme: number, generosIds: number[]) {
+        return await filmeRepository.updateGenerosFilme(idFilme, generosIds);
     }
 
 }
