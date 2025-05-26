@@ -5,6 +5,11 @@ export class AvaliacaoService {
   private repo = new AvaliacaoRepository();
 
   async create(data: Prisma.AvaliacaoCreateInput) {
+    const { nota } = data;
+
+    if (nota < 0.5 || nota > 5) {
+      throw new Error('A nota deve estar entre 0.5 e 5');
+    }
     return this.repo.create(data);
   }
 

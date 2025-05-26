@@ -44,5 +44,14 @@ router.put("/update/:id", async (req: Request, res: Response) => {
     }
 });
 
+router.put("/:id/generos", async (req: Request, res: Response) => {
+    try {
+        await filmeController.updateGenerosFilme(req, res);
+    } catch (error) {
+        console.error(error);
+    }
+});
+
+
 
 export default router;

@@ -60,12 +60,29 @@ export const useAuth = () => {
         }
     }, []);
 
-    const logout = () => {
+    const logout = async () => {
+        const token = localStorage.getItem("token");
+        const apiUrl = import.meta.env.VITE_API_URL;
+
+        if (token && apiUrl) {
+            try {
+                await fetch(`${apiUrl}/user/logout`, {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+            } catch (error) {
+                console.error("Erro ao fazer logout no backend:", error);
+            }
+        }
+
         localStorage.removeItem("token");
         setUser(null);
         setToken(null);
         window.location.href = "/login";
     };
+
 
     return { user, setUser, token, logout };
 };

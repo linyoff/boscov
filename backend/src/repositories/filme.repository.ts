@@ -10,12 +10,41 @@ export class FilmeRepository {
         });
     }
 
+    async createGeneroFilmeRelations(idFilme: number, generosIds: number[]) {
+        const data = generosIds.map(idGenero => ({
+            idFilme,
+            idGenero
+        }));
+
+        await prisma.genero_filme.createMany({
+            data,
+            skipDuplicates: true
+        });
+    }
+
     async getAllFilmes() {
-        return prisma.filme.findMany();
+        return prisma.filme.findMany({
+            include: {
+                generos: {
+                    include: {
+                        genero: true
+                    }
+                }
+            }
+        });
     }
 
     async getFilmeById(id: number) {
-        return prisma.filme.findUnique({ where: { id } });
+        return prisma.filme.findUnique({
+            where: { id },
+            include: {
+                generos: {
+                    include: {
+                        genero: true
+                    }
+                }
+            }
+        });
     }
 
     async deleteFilme(id: number) {
@@ -28,5 +57,24 @@ export class FilmeRepository {
             data
         });
     }
+
+    async updateGenerosFilme(idFilme: number, generosIds: number[]) {
+        //apaga generos antigos
+        await prisma.genero_filme.deleteMany({
+            where: { idFilme }
+        });
+
+        //cria os novos generos
+        const data = generosIds.map(idGenero => ({
+            idFilme,
+            idGenero
+        }));
+
+        await prisma.genero_filme.createMany({
+            data,
+            skipDuplicates: true
+        });
+    }
+
 
 }

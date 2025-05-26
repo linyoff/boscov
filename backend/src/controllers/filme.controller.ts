@@ -8,7 +8,7 @@ export class FilmeController {
     createFilme = async (req: Request, res: Response) => {
         try {
             const filme = await filmeService.createFilme(req.body);
-            return res.status(201).json({ message: "Filme criado com sucesso", filme});
+            return res.status(201).json({ message: "Filme criado com sucesso", filme });
         } catch (err: any) {
             return res.status(400).json({ error: err.message });
         }
@@ -41,6 +41,20 @@ export class FilmeController {
             return res.status(400).json({ error: err.message });
         }
     };
+
+    async updateGenerosFilme(req: Request, res: Response) {
+        const idFilme = Number(req.params.id);
+        const { generosIds } = req.body;
+
+        try {
+            await filmeService.updateGenerosFilme(idFilme, generosIds);
+            res.json({ message: "Gêneros atualizados com sucesso." });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: "Erro ao atualizar gêneros." });
+        }
+    }
+
 
 }
 
