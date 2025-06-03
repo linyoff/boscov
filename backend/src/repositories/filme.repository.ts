@@ -23,19 +23,23 @@ export class FilmeRepository {
     }
 
     async getAllFilmes() {
-        return prisma.filme.findMany({
+        const filmes = await prisma.filme.findMany({
             include: {
                 generos: {
-                    include: {
-                        genero: true
-                    }
+                    include: { genero: true }
                 }
             }
         });
+
+        return filmes.map(filme => ({
+            ...filme,
+            generos: filme.generos.map(gf => gf.genero)
+        }));
     }
 
+
     async getFilmeById(id: number) {
-        return prisma.filme.findUnique({
+        const filme = await prisma.filme.findUnique({
             where: { id },
             include: {
                 generos: {
@@ -45,6 +49,13 @@ export class FilmeRepository {
                 }
             }
         });
+
+        if (!filme) return null;
+
+        return {
+            ...filme,
+            generos: filme.generos.map(gf => gf.genero)
+        };
     }
 
     async deleteFilme(id: number) {

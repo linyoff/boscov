@@ -69,7 +69,7 @@ export default function Auth() {
       console.log("Token recebido:", res.data);
       //salavndo token no localStorage
       localStorage.setItem("token", token);
-      navigate("/home");
+      navigate("/");
       alert("Usuario logado!");
       return res.data;
     } catch (error) {

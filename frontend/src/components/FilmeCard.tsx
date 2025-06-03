@@ -1,42 +1,57 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { Filme } from "../models/Filme";
 
 interface FilmeCardProps {
   filme: Filme;
 }
 
 const FilmeCard: React.FC<FilmeCardProps> = ({ filme }) => {
+  const {
+    id,
+    poster,
+    nome,
+    anoLancamento,
+    duracao,
+    diretor,
+    produtora,
+    classificacao,
+    generos,
+  } = filme;
+
   return (
-    <div className="bg-tertiary rounded-xl overflow-hidden shadow-md text-textPrimary w-72">
+    <div className="bg-tertiary rounded-lg overflow-hidden shadow-md text-textPrimary w-48">
       <img
-        src={filme.poster}
-        alt={`Capa de ${filme.nome}`}
-        className="w-full h-96 object-cover"
+        src={poster}
+        alt={`Capa de ${nome}`}
+        className="w-full h-60 object-cover"
       />
 
-      <div className="p-4 flex flex-col gap-2">
-        <h2 className="text-xl font-bold">{filme.nome}</h2>
-        <p className="text-sm text-textSecondary">{filme.anoLancamento} • {filme.duracao} min</p>
-        <p className="text-sm text-textSecondary">Diretor: {filme.diretor}</p>
-        <p className="text-sm text-textSecondary">Produtora: {filme.produtora}</p>
-        <p className="text-sm text-textSecondary">Classificação: {filme.classificacao}</p>
+      <div className="p-3 flex flex-col gap-1">
+        <h2 className="text-lg font-semibold">{nome}</h2>
+        <p className="text-xs text-textSecondary">
+          {anoLancamento} • {duracao} min
+        </p>
+        <p className="text-xs text-textSecondary">Diretor: {diretor}</p>
+        {<p className="text-xs text-textSecondary">Produtora: {produtora}</p>}
+        <p className="text-xs text-textSecondary">Classificação: {classificacao}</p>
 
-        {filme.generos && (
-          <div className="flex flex-wrap gap-1 mt-2">
-            {filme.generos.map((g) => (
-              <span
-                key={g.id}
-                className="bg-secondary text-sm px-2 py-0.5 rounded-full text-white"
+        {generos?.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-1">
+            {generos.map(({ id, descricao }) => (
+              <p
+                key={id}
+                className="bg-secondary text-xs px-1.5 py-0.5 rounded-full text-white"
               >
-                {g.nome}
-              </span>
+                {descricao}
+              </p>
             ))}
           </div>
         )}
 
         <Link
-          to={`/filmes/${filme.id}`}
-          className="mt-4 bg-secondary hover:bg-primary transition-colors text-white font-semibold py-2 px-4 rounded text-center"
+          to={`/filme/${id}`}
+          className="mt-2 bg-secondary hover:bg-primary transition-colors text-white text-xs font-medium py-1.5 px-3 rounded text-center"
         >
           Ver detalhes
         </Link>
