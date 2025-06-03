@@ -93,7 +93,7 @@ export default function UserProfile() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="flex items-center justify-center h-screen bg-primary">
       <HeaderCustom />
       <main className="flex-grow w-full max-w-3xl mx-auto mt-16 px-6 sm:px-10">
         <div className="text-center sm:text-left space-y-1">
