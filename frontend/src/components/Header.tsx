@@ -16,14 +16,14 @@ const HeaderCustom: React.FC = () => {
                 <h1 className="ml-2 font-bold text-textPrimary text-xl">Boscov</h1>
             </div>
 
-            {/*icones para mobile */}
+            {/*icones para mobile*/}
             <div className="flex items-center gap-4 md:hidden text-textPrimary">
                 <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden">
                     {menuOpen ? <X size={28} /> : <Menu size={28} />}
                 </button>
             </div>
 
-            {/*nav desktop */}
+            {/*nav desktop*/}
             <nav className="hidden md:flex items-center gap-8 text-textPrimary">
                 <Link to="/" className="hover:bg-primary px-3 py-2 rounded transition">Home</Link>
                 <Link to="/user-profile" className="hover:bg-primary px-3 py-2 rounded transition">Perfil</Link>
@@ -35,14 +35,14 @@ const HeaderCustom: React.FC = () => {
                     <div className="flex gap-1 items-center">
                         <User size={20} className="text-textPrimary" />
                         <span>Olá, </span>
-                        <Link to="/login" className="font-bold hover:underline">Entre</Link>
+                        <Link to="/auth" className="font-bold hover:underline">Entre</Link>
                         <span> ou </span>
-                        <Link to="/register" className="font-bold hover:underline">Cadastre-se</Link>
+                        <Link to="/auth" className="font-bold hover:underline">Cadastre-se</Link>
                     </div>
                 )}
             </nav>
 
-            {/*mobile */}
+            {/*mobile*/}
             {menuOpen && (
                 <div className="fixed top-0 right-0 w-3/4 h-full bg-primary shadow-lg flex flex-col items-start p-6 gap-6 text-textPrimary md:hidden transition">
                     <button onClick={() => setMenuOpen(false)} className="self-end">

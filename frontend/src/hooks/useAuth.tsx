@@ -49,7 +49,7 @@ export const useAuth = () => {
 
                     if (contentType && contentType.includes("application/json")) {
                         const data = JSON.parse(responseText);
-                        if (data.name) {
+                        if (data.nome) {
                             setUser(data);
                         }
                     } else {
@@ -80,7 +80,7 @@ export const useAuth = () => {
         localStorage.removeItem("token");
         setUser(null);
         setToken(null);
-        window.location.href = "/login";
+        window.location.href = "/auth";
     };
 
 
