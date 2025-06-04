@@ -4,11 +4,13 @@ import Button from "../components/CustomButton";
 import Footer from "../components/Footer";
 import { useAuth } from "../hooks/useAuth";
 import axios from "axios";
+import { Filme } from "../models/Filme";
+import FilmeCard from "../components/FilmeCard";
+import { Link } from "react-router-dom";
 
-//formatar data para exibir
+// formatar data para exibir
 const formatDate = (isoDate?: string | Date) => {
   if (!isoDate) return "Data desconhecida";
-
   const date = new Date(isoDate);
   if (isNaN(date.getTime())) return "Data inválida";
 
@@ -27,11 +29,36 @@ export default function UserProfile() {
   const [isEditing, setIsEditing] = useState(false);
   const [isEditingPassword, setIsEditingPassword] = useState(false);
   const [editedName, setEditedName] = useState("");
+  const [editedApelido, setEditedApelido] = useState("");
   const [editedEmail, setEditedEmail] = useState("");
+  const [filmesAvaliados, setFilmesAvaliados] = useState<Filme[]>([]);
+
+  useEffect(() => {
+    const fetchFilmesAvaliados = async () => {
+      try {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/avaliacoes/user/${user?.id}?limit=5`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        // Supondo que a API retorna um array de objetos com filme dentro (avaliacoes.map(a => a.filme))
+        const filmes = res.data.map((avaliacao: any) => avaliacao.filme);
+        setFilmesAvaliados(filmes);
+      } catch (error) {
+        console.error("Erro ao buscar filmes avaliados", error);
+      }
+    };
+
+    if (user?.id) {
+      fetchFilmesAvaliados();
+    }
+  }, [user, token]);
 
   useEffect(() => {
     if (user) {
       setEditedName(user.nome ?? "");
+      setEditedApelido(user.apelido ?? "");
       setEditedEmail(user.email ?? "");
     }
   }, [user]);
@@ -49,19 +76,18 @@ export default function UserProfile() {
         return;
       }
 
-      const formData = new FormData();
-      formData.append("name", editedName);
-      formData.append("email", editedEmail);
-      if (newPassword) {
-        formData.append("password", newPassword);
-      }
+      const payload = {
+        nome: editedName,
+        email: editedEmail,
+        apelido: editedApelido,
+        senha: newPassword || undefined, // só manda se tiver senha
+      };
 
-      const response = await axios.put(
-        `${import.meta.env.VITE_API_URL}/user/edit/${id}`,
-        formData,
+      await axios.put(
+        `${import.meta.env.VITE_API_URL}/user/update/${id}`,
+        payload,
         {
           headers: {
-            "Content-Type": "multipart/form-data",
             Authorization: `Bearer ${token}`,
           },
         }
@@ -73,17 +99,17 @@ export default function UserProfile() {
       setConfirmPassword("");
       setIsEditing(false);
       setIsEditingPassword(false);
-
-      return response.data;
     } catch (error) {
       console.error(error);
       setMessage("Erro ao salvar alterações.");
     }
   };
 
+
   const handleCancelar = () => {
     setEditedName(user?.nome || "");
     setEditedEmail(user?.email || "");
+    setEditedApelido(user?.apelido || "");
     setCurrentPassword("");
     setNewPassword("");
     setConfirmPassword("");
@@ -93,38 +119,45 @@ export default function UserProfile() {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-primary">
+    <div className="flex flex-col min-h-screen bg-primary text-primary">
       <HeaderCustom />
-      <main className="flex-grow w-full max-w-3xl mx-auto mt-16 px-6 sm:px-10">
-        <div className="text-center sm:text-left space-y-1">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-textPrimary">
-            {user?.nome}
-          </h2>
-          <p className="text-base sm:text-lg md:text-xl text-textPrimary">
-            {user?.email}
-          </p>
+
+      <main className="max-w-3xl mx-auto w-full px-6 sm:px-10 py-12 space-y-10 bg-primary text-primary min-h-screen">
+
+        <section className="space-y-1 text-center sm:text-left">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-textPrimary">{user?.nome}</h2>
+          <p className="text-base sm:text-lg md:text-xl text-textPrimary">{user?.apelido}</p>
+          <p className="text-base sm:text md:text text-textPrimary">{user?.email}</p>
           <p className="text-sm sm:text-base text-textSecondary">
             Desde {formatDate(user?.createdAt)}
           </p>
-        </div>
+        </section>
 
-        <div>
+        {/* Edição */}
+        <section>
           {!isEditing && (
-            <div className="mt-6">
-              <Button onClick={() => { setIsEditing(true); setMessage(""); }}>
-                Editar perfil
-              </Button>
-            </div>
+            <Button onClick={() => { setIsEditing(true); setMessage(""); }}>
+              Editar perfil
+            </Button>
           )}
 
           {isEditing && (
-            <div className="w-full mt-6 space-y-4">
+            <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">Nome</label>
                 <input
                   type="text"
                   value={editedName}
                   onChange={(e) => setEditedName(e.target.value)}
+                  className="mt-1 w-full border rounded p-2"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Apelido</label>
+                <input
+                  type="text"
+                  value={editedApelido}
+                  onChange={(e) => setEditedApelido(e.target.value)}
                   className="mt-1 w-full border rounded p-2"
                 />
               </div>
@@ -147,54 +180,80 @@ export default function UserProfile() {
           )}
 
           {isEditingPassword && (
-            <div className="w-full mt-6 space-y-4 border-t pt-4">
+            <div className="space-y-4 border-t pt-4 mt-6">
               <h3 className="text-sm font-semibold text-gray-700 mb-2">Alterar senha</h3>
               <input
                 type="password"
                 placeholder="Senha atual"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                className="mt-1 w-full border rounded p-2 mb-2"
+                className="w-full border rounded p-2"
               />
               <input
                 type="password"
                 placeholder="Nova senha"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="mt-1 w-full border rounded p-2 mb-2"
+                className="w-full border rounded p-2"
               />
               <input
                 type="password"
                 placeholder="Confirmar nova senha"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="mt-1 w-full border rounded p-2"
+                className="w-full border rounded p-2"
               />
             </div>
           )}
 
           {message && (
-            <p className="mt-4 text-center text-sm text-yellow-600 font-medium">{message}</p>
+            <p className="mt-4 text-sm text-yellow-600 text-center">{message}</p>
           )}
 
           {(isEditing || isEditingPassword) && (
-            <div className="flex gap-4 mt-4">
+            <div className="flex flex-wrap gap-4 mt-4">
               <Button onClick={handleSave}>Salvar alterações</Button>
               <Button onClick={handleCancelar}>Cancelar</Button>
             </div>
           )}
-        </div>
+        </section>
 
-        <div className="flex justify-start mt-6">
+        {/* Logout */}
+        <section>
           <Button onClick={logout}>
-            Sair
+            Sair da conta
           </Button>
-        </div>
+        </section>
+        {/* Últimos filmes avaliados */}
+        <section className="mt-12">
+          <h3 className="text-xl font-semibold mb-4 text-textPrimary text-center sm:text-left">
+            Últimos filmes avaliados
+          </h3>
 
-        <div className="my-12">
-          <h1 className="font-bold text-2xl">Histórico de Montagens</h1>
-        </div>
+          {filmesAvaliados.length > 0 ? (
+            <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
+              {filmesAvaliados.map((filme) => (
+                <FilmeCard key={filme.id} filme={filme} />
+              ))}
+            </div>
+          ) : (
+            <p className="text-textSecondary text-center sm:text-left">
+              Nenhum filme avaliado ainda.
+            </p>
+          )}
+
+          <div className="mt-6 text-center sm:text-left">
+            <Link
+              to="/avaliacoes"
+              className="inline-block bg-secondary hover:bg-primary text-white px-4 py-2 rounded text-sm font-medium transition-colors"
+            >
+              Ver todos os filmes avaliados
+            </Link>
+          </div>
+        </section>
+
       </main>
+
       <Footer />
     </div>
   );

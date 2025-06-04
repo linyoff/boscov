@@ -39,7 +39,7 @@ router.put("/update/:idUsuario/:idFilme", async (req: Request, res: Response) =>
     }
 });
 
-// Deletar avaliação
+//deletar avaliação
 router.delete("/delete/:idUsuario/:idFilme", async (req: Request, res: Response) => {
     try {
         await avaliacaoController.delete(req, res);
@@ -47,5 +47,14 @@ router.delete("/delete/:idUsuario/:idFilme", async (req: Request, res: Response)
         console.error(error);
     }
 });
+
+router.get("/usuario/:idUsuario/filme/:idFilme", async (req: Request, res: Response) => {
+    try {
+        await avaliacaoController.getByUsuarioAndFilme(req, res);
+    } catch (error) {
+        console.error(error);
+    }
+});
+
 
 export default router;
