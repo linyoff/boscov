@@ -6,6 +6,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 export default function Auth() {
+
   const [form, setForm] = useState({
     nome: "",
     apelido: "",
@@ -14,7 +15,9 @@ export default function Auth() {
     senha: "",
     confirmaSenha: ""
   });
+
   const [isLogin, setIsLogin] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,10 +35,11 @@ export default function Auth() {
 
   const handleRegister = async () => {
     if (form.senha !== form.confirmaSenha) {
-      alert("As senhas não coincidem!");
+      setErrorMessage("As senhas não coincidem");
       return;
     }
     try {
+      setErrorMessage(null);
       const res = await axios.post("http://localhost:3000/user/register", {
         nome: form.nome,
         apelido: form.apelido,
@@ -44,14 +48,14 @@ export default function Auth() {
         data_nascimento: form.dataNasc
       })
       console.log("User created:", res.data);
-      alert("Cadastro realizado!");
+
       return res.data;
     } catch (error: any) {
       if (axios.isAxiosError(error)) {
         const errorMessage = error.response?.data?.error || "Erro desconhecido";
-        alert(`Erro: ${errorMessage}`);
+        setErrorMessage(errorMessage);
       } else {
-        alert("Erro ao registrar");
+        setErrorMessage(errorMessage);
       }
       console.error("Erro ao criar usuário", error);
       throw error;
@@ -60,6 +64,7 @@ export default function Auth() {
 
   const handleLogin = async () => {
     try {
+      setErrorMessage(null);
       const res = await axios.post("http://localhost:3000/user/login", {
         email: form.email,
         senha: form.senha
@@ -70,10 +75,11 @@ export default function Auth() {
       //salavndo token no localStorage
       localStorage.setItem("token", token);
       navigate("/");
-      alert("Usuario logado!");
       return res.data;
-    } catch (error) {
-      console.error("Error logging in:", error);
+    } catch (error: any) {
+      const errorMessage =
+        error?.response?.data?.error || "Erro ao fazer login. Tente novamente.";
+      setErrorMessage(errorMessage);
       throw error;
     }
   };
@@ -167,6 +173,12 @@ export default function Auth() {
                   onChange={handleChange}
                   required
                 />
+              )}
+
+              {errorMessage && (
+                <div className="text-red-600 text-center font-medium text-sm">
+                  {errorMessage}
+                </div>
               )}
 
               {isLogin && (

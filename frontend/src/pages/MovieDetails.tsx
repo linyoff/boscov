@@ -2,26 +2,117 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Filme } from "../models/Filme";
 import { useFilmes } from "../hooks/useFilmes";
+import { useAuth } from "../hooks/useAuth";
+import { useAvaliacoes } from "../hooks/useAvaliacoes";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import Button from "../components/CustomButton";
+import { Avaliacao } from "../models/Avaliacao";
 
 const MovieDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { fetchFilmeById } = useFilmes();
   const [filme, setFilme] = useState<Filme | null>(null);
   const [carregando, setCarregando] = useState(true);
+  const { user } = useAuth();
+  const {
+    avaliacoes,
+    fetchAvaliacoesPorFilme,
+    enviarAvaliacao,
+    atualizarAvaliacao,
+  } = useAvaliacoes();
+  const [comentario, setComentario] = useState("");
+  const [mensagem, setMensagem] = useState("");
+  const [nota, setNota] = useState<number>(0);
+
+  const [avaliacaoUsuario, setAvaliacaoUsuario] = useState<Avaliacao | null>(
+    null
+  );
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
+    if (filme?.id) {
+      fetchAvaliacoesPorFilme(filme.id);
+    }
+  }, [filme?.id, fetchAvaliacoesPorFilme]);
+
+  useEffect(() => {
+    let isMounted = true;
     const buscarFilme = async () => {
       if (id) {
         const data = await fetchFilmeById(id);
-        setFilme(data);
+        if (isMounted) {
+          setFilme(data);
+          setCarregando(false);
+        }
+      } else {
+        setCarregando(false);
       }
-      setCarregando(false);
     };
-
     buscarFilme();
+    return () => {
+      isMounted = false;
+    };
   }, [id, fetchFilmeById]);
+
+
+  useEffect(() => {
+    if (user && avaliacoes.length > 0) {
+      const userReview = avaliacoes.find(
+        (avaliacao) => avaliacao.usuario.id === user.id
+      );
+      if (userReview) {
+        setAvaliacaoUsuario(userReview);
+        setComentario(userReview.comentario);
+        setNota(userReview.nota);
+        setIsEditing(true);
+      } else {
+        setAvaliacaoUsuario(null);
+        setComentario("");
+        setNota(0);
+        setIsEditing(false);
+      }
+    } else {
+      setAvaliacaoUsuario(null);
+      setComentario("");
+      setNota(0);
+      setIsEditing(false);
+    }
+  }, [avaliacoes, user]);
+
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || !filme) return;
+    if (nota < 0 || nota > 5) {
+      setMensagem("Nota deve estar entre 0 e 5.");
+      return;
+    }
+
+    try {
+      if (isEditing && avaliacaoUsuario) {
+        //se estiver editando chama a função de atualização
+        await atualizarAvaliacao(
+          filme.id, 
+          comentario,
+          nota
+        );
+        setMensagem("Avaliação atualizada com sucesso!");
+      } else {
+        //se não estiver editando envia uma nova avaliação
+        await enviarAvaliacao(filme.id, comentario, user.id, nota);
+        setMensagem("Avaliação enviada com sucesso!");
+      }
+      setComentario("");
+      setNota(0); //reseta a nota após enviar
+      await fetchAvaliacoesPorFilme(filme.id); //recarrega as avaliações para refletir a mudança
+    } catch (err) {
+      setMensagem("Erro ao enviar/atualizar avaliação.");
+      console.error("Erro na avaliação:", err);
+    }
+
+    setTimeout(() => setMensagem(""), 3000);
+  };
 
   if (carregando)
     return (
@@ -35,25 +126,35 @@ const MovieDetails: React.FC = () => {
   if (!filme)
     return (
       <div className="flex items-center justify-center h-screen bg-primary">
-        <p className="text-xl font-semibold text-red-500">Filme não encontrado.</p>
+        <p className="text-xl font-semibold text-red-500">
+          Filme não encontrado.
+        </p>
       </div>
     );
+
+  const avaliacoesOrdenadas = avaliacoes
+    .filter((avaliacao) => avaliacao.usuario.id !== user?.id)
+
+  //se usuario tiver avaliação coloca ela no início da lista
+  const avaliacoesParaExibir = avaliacaoUsuario
+    ? [avaliacaoUsuario, ...avaliacoesOrdenadas]
+    : avaliacoesOrdenadas;
 
   return (
     <div className="flex flex-col min-h-screen bg-primary text-primary">
       <Header />
 
-      <div className="flex-1 flex flex-col items-center justify-center w-full p-6">
-        <div className="w-full max-w-5xl bg-tertiary rounded-xl shadow-lg text-textPrimary p-6 mb-6">
-
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+      <main className="flex-1 flex flex-col items-center justify-start w-full p-6">
+        {/*informações do filme */}
+        <section className="w-full max-w-5xl bg-tertiary rounded-xl shadow-lg text-textPrimary p-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <img
               src={filme.poster}
               alt={`Capa de ${filme.nome}`}
               className="w-full h-auto max-h-[500px] object-cover rounded-lg shadow-md"
             />
 
-            <div className="flex flex-col justify-center text-textPrimary">
+            <div className="flex flex-col justify-center">
               <h1 className="text-3xl font-bold mb-4">{filme.nome}</h1>
               <p className="text-sm mb-1">
                 <strong>Ano de Lançamento:</strong> {filme.anoLancamento}
@@ -90,26 +191,82 @@ const MovieDetails: React.FC = () => {
               )}
             </div>
           </div>
-        </div>
+        </section>
 
-        <div className="w-full max-w-5xl bg-white rounded-xl shadow-lg text-textPrimary p-6">
-          <h2 className="text-2xl font-bold mb-4">Avaliações</h2>
-          <div className="space-y-4">
-            <div className="border-b pb-2">
-              <p className="font-semibold">Usuário 1</p>
-              <p className="text-sm">Ótimo filme, recomendo muito!</p>
-            </div>
-            <div className="border-b pb-2">
-              <p className="font-semibold">Usuário 2</p>
-              <p className="text-sm">Bom enredo e ótima atuação.</p>
-            </div>
-            <div>
-              <p className="font-semibold">Usuário 3</p>
-              <p className="text-sm">Esperava mais, mas foi divertido.</p>
-            </div>
+        {/*formulário de avaliação*/}
+        {user ? (
+          <section className="w-full max-w-5xl rounded-xl shadow-lg p-6 mt-6">
+            <h2 className="text-xl font-bold mb-4">
+              {isEditing ? "Edite sua avaliação" : "Deixe sua avaliação"}
+            </h2>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Nota (0 a 5)
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  max={5}
+                  step={0.5}
+                  value={nota}
+                  onChange={(e) => setNota(parseFloat(e.target.value))}
+                  className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-primary text-black" // Adicionei 'text-black' para garantir a cor do texto do input
+                  required
+                />
+              </div>
+
+              <textarea
+                name="comentario"
+                required
+                value={comentario}
+                onChange={(e) => setComentario(e.target.value)}
+                placeholder="Escreva seu comentário sobre o filme..."
+                className="w-full border border-gray-300 rounded-md p-3 resize-none focus:outline-none focus:ring-2 focus:ring-primary text-black" // Adicionei 'text-black'
+                rows={4}
+              />
+              <Button type="submit">
+                {isEditing ? "Atualizar Avaliação" : "Enviar Avaliação"}
+              </Button>
+
+              {mensagem && (
+                <p className="text-sm mt-2 text-center text-red-600">
+                  {mensagem}
+                </p>
+              )}
+            </form>
+          </section>
+        ) : (
+          <div className="w-full max-w-5xl text-textPrimary mt-6 text-center">
+            <p>
+              <strong>Faça login</strong> para deixar sua avaliação.
+            </p>
           </div>
-        </div>
-      </div>
+        )}
+
+        {/*seção de avaliações */}
+        <section className="w-full max-w-5xl rounded-xl shadow-lg text-textPrimary p-6 mt-6">
+          <h2 className="text-2xl font-bold mb-4">Avaliações</h2>
+
+          {avaliacoesParaExibir.length > 0 ? (
+            <div className="space-y-4">
+              {avaliacoesParaExibir.map((avaliacao) => (
+                <div
+                  key={avaliacao.id}
+                  className="border-b pb-2 last:border-none"
+                >
+                  <p className="font-semibold">{avaliacao.usuario.nome}</p>
+                  <p className="font-semibold">{avaliacao.nota}</p>
+                  <p className="text-sm">{avaliacao.comentario}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-600">Nenhuma avaliação ainda.</p>
+          )}
+        </section>
+      </main>
+
       <Footer />
     </div>
   );

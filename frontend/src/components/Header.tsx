@@ -26,8 +26,6 @@ const HeaderCustom: React.FC = () => {
             {/*nav desktop*/}
             <nav className="hidden md:flex items-center gap-8 text-textPrimary">
                 <Link to="/" className="hover:bg-primary px-3 py-2 rounded transition">Home</Link>
-                <Link to="/user-profile" className="hover:bg-primary px-3 py-2 rounded transition">Perfil</Link>
-                <Link to="/settings" className="hover:bg-primary px-3 py-2 rounded transition">Configurações</Link>
 
                 {user ? (
                     <span>Olá, <Link to="/user-profile" className="font-bold hover:underline">{user.nome}</Link></span>

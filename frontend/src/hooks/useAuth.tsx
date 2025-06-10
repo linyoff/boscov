@@ -1,25 +1,8 @@
 import { useEffect, useState } from "react";
-
-export enum TipoUsuario {
-    COMUM = "COMUM",
-    ADMIN = "ADMIN"
-}
-
-export interface User {
-    id: number;
-    nome: string;
-    apelido?: string;
-    email: string;
-    senha: string;
-    data_nascimento: Date;
-    tipoUsuario: TipoUsuario;
-    status: boolean;
-    createdAt: Date;
-    updatedAt: Date;
-}
+import { Usuario } from "../models/User";
 
 export const useAuth = () => {
-    const [user, setUser] = useState<User | null>(null);
+    const [user, setUser] = useState<Usuario | null>(null);
     const [token, setToken] = useState<string | null>(null);
 
     useEffect(() => {
@@ -66,22 +49,23 @@ export const useAuth = () => {
 
         if (token && apiUrl) {
             try {
-                await fetch(`${apiUrl}/user/logout`, {
+                await fetch(`${apiUrl}/logout`, {
                     method: "POST",
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
                 });
-            } catch (error) {
-                console.error("Erro ao fazer logout no backend:", error);
+            } catch (err) {
+                console.warn("Falha ao chamar /logout, prosseguindo com logout local.");
             }
         }
 
         localStorage.removeItem("token");
         setUser(null);
         setToken(null);
-        window.location.href = "/auth";
+        window.location.replace("/auth");
     };
+
 
 
     return { user, setUser, token, logout };

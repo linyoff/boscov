@@ -28,4 +28,9 @@ export class AvaliacaoService {
   async delete(idUsuario: number, idFilme: number) {
     return this.repo.delete(idUsuario, idFilme);
   }
+
+  async getByUsuarioAndFilme(idUsuario: number, idFilme: number) {
+    return this.repo.getByUsuarioAndFilme(idUsuario, idFilme);
+  }
+
 }

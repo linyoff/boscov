@@ -34,4 +34,12 @@ export class AvaliacaoController {
     const result = await this.service.delete(Number(idUsuario), Number(idFilme));
     res.json({ message: "Avaliação removida com sucesso", result });
   }
+
+  async getByUsuarioAndFilme(req: Request, res: Response) {
+    const { idUsuario, idFilme } = req.params;
+    const result = await this.service.getByUsuarioAndFilme(Number(idUsuario), Number(idFilme));
+    res.json(result);
+  }
+
+
 }

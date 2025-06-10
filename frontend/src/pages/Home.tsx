@@ -6,10 +6,12 @@ import FilmeCard from "../components/FilmeCard";
 import { useFilmes } from "../hooks/useFilmes";
 import { useState } from "react";
 import { Filme } from "../models/Filme";
+import { useNavigate } from "react-router-dom";
 
 export default function Home() {
   const { filmes, loading } = useFilmes();
   const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
 
   //filtra os filmes por nome
   const filteredFilmes = filmes.filter(filme =>
@@ -43,7 +45,7 @@ export default function Home() {
         </p>
 
         <div className="flex gap-4 flex-wrap justify-center mt-6">
-          <Button className="w-44">Ver Filmes</Button>
+          <Button className="w-44" onClick={() => navigate("/filmes")}>Ver Filmes</Button>
         </div>
       </div>
 

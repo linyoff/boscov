@@ -4,7 +4,7 @@ import { PrismaClient, Prisma } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export class AvaliacaoRepository {
-  
+
   async create(data: Prisma.AvaliacaoCreateInput) {
     return prisma.avaliacao.create({ data });
   }
@@ -35,4 +35,12 @@ export class AvaliacaoRepository {
       where: { idUsuario_idFilme: { idUsuario, idFilme } }
     });
   }
+
+  async getByUsuarioAndFilme(idUsuario: number, idFilme: number) {
+    return prisma.avaliacao.findUnique({
+      where: { idUsuario_idFilme: { idUsuario, idFilme } },
+      include: { usuario: true }
+    });
+  }
+
 }
