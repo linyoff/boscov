@@ -1,9 +1,10 @@
 import { Filme } from "./Filme";
+import { Usuario } from "./User";
 
 export interface Avaliacao {
   id: number;
   comentario: string;
-  data: Date;
+  nota: number;
   filme: Filme;
-  usuario: User;
+  usuario: Usuario;
 }
