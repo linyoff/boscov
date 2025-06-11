@@ -4,8 +4,6 @@ import Button from "../components/CustomButton";
 import Footer from "../components/Footer";
 import { useAuth } from "../hooks/useAuth";
 import axios from "axios";
-import { Filme } from "../models/Filme";
-import FilmeCard from "../components/FilmeCard";
 import { Link } from "react-router-dom";
 
 // formatar data para exibir
@@ -31,29 +29,6 @@ export default function UserProfile() {
   const [editedName, setEditedName] = useState("");
   const [editedApelido, setEditedApelido] = useState("");
   const [editedEmail, setEditedEmail] = useState("");
-  const [filmesAvaliados, setFilmesAvaliados] = useState<Filme[]>([]);
-
-  useEffect(() => {
-    const fetchFilmesAvaliados = async () => {
-      try {
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/avaliacoes/user/${user?.id}?limit=5`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        // Supondo que a API retorna um array de objetos com filme dentro (avaliacoes.map(a => a.filme))
-        const filmes = res.data.map((avaliacao: any) => avaliacao.filme);
-        setFilmesAvaliados(filmes);
-      } catch (error) {
-        console.error("Erro ao buscar filmes avaliados", error);
-      }
-    };
-
-    if (user?.id) {
-      fetchFilmesAvaliados();
-    }
-  }, [user, token]);
 
   useEffect(() => {
     if (user) {
@@ -133,7 +108,6 @@ export default function UserProfile() {
           </p>
         </section>
 
-        {/* Edição */}
         <section>
           {!isEditing && (
             <Button onClick={() => { setIsEditing(true); setMessage(""); }}>
@@ -218,39 +192,21 @@ export default function UserProfile() {
           )}
         </section>
 
-        {/* Logout */}
         <section>
           <Button onClick={logout}>
             Sair da conta
           </Button>
         </section>
-        {/* Últimos filmes avaliados */}
-        <section className="mt-12">
-          <h3 className="text-xl font-semibold mb-4 text-textPrimary text-center sm:text-left">
-            Últimos filmes avaliados
-          </h3>
 
-          {filmesAvaliados.length > 0 ? (
-            <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
-              {filmesAvaliados.map((filme) => (
-                <FilmeCard key={filme.id} filme={filme} />
-              ))}
-            </div>
-          ) : (
-            <p className="text-textSecondary text-center sm:text-left">
-              Nenhum filme avaliado ainda.
-            </p>
-          )}
+        <div className="mt-6 text-center sm:text-left">
+          <Link
+            to="/avaliacoes"
+            className="inline-block bg-secondary hover:bg-primary text-white px-4 py-2 rounded text-sm font-medium transition-colors"
+          >
+            Ver todos os filmes avaliados
+          </Link>
+        </div>
 
-          <div className="mt-6 text-center sm:text-left">
-            <Link
-              to="/avaliacoes"
-              className="inline-block bg-secondary hover:bg-primary text-white px-4 py-2 rounded text-sm font-medium transition-colors"
-            >
-              Ver todos os filmes avaliados
-            </Link>
-          </div>
-        </section>
 
       </main>
 

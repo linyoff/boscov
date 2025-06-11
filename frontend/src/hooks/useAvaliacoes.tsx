@@ -4,6 +4,7 @@ import { useAuth } from "./useAuth";
 
 export function useAvaliacoes() {
   const [avaliacoes, setAvaliacoes] = useState<Avaliacao[]>([]);
+  const [avaliacoesUsuario, setAvaliacoesUsuario] = useState<Avaliacao[]>([]);
   const apiUrl = import.meta.env.VITE_API_URL;
 
   const { user, token } = useAuth();
@@ -20,6 +21,40 @@ export function useAvaliacoes() {
       console.error("Erro ao buscar avaliações:", error);
     }
   }, [apiUrl]);
+
+  const fetchAvaliacoesPorUsuario = useCallback(
+    async (idUsuario: number) => {
+      if (!token) {
+        throw new Error("Usuário não autenticado. Impossível buscar avaliações.");
+      }
+      if (!apiUrl) {
+        throw new Error("URL da API não configurada.");
+      }
+
+      try {
+        const res = await fetch(`${apiUrl}/avaliacao/usuario/${idUsuario}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.message || "Erro ao buscar avaliações do usuário.");
+        }
+
+        const data: Avaliacao[] = await res.json();
+        setAvaliacoesUsuario(data);
+        return data;
+      } catch (error) {
+        console.error("Erro ao buscar avaliações por usuário:", error);
+        throw error;
+      }
+    },
+    [apiUrl, token]
+  );
 
   const enviarAvaliacao = useCallback(
     async (idFilme: number, comentario: string, idUsuario: number, nota: number) => {
@@ -44,7 +79,7 @@ export function useAvaliacoes() {
 
       const nova = await res.json();
 
-      return nova; //retorna a nova avaliação se precisar dela
+      return nova;
     },
     [apiUrl, token]
   );
@@ -52,7 +87,7 @@ export function useAvaliacoes() {
   const atualizarAvaliacao = useCallback(
 
     async (idFilme: number, comentario: string, nota: number) => {
-      if (!user || !token) { //verificar user e token
+      if (!user || !token) {
         throw new Error("Usuário não autenticado.");
       }
       if (!apiUrl) {
@@ -96,7 +131,7 @@ export function useAvaliacoes() {
       }
 
       try {
-        const res = await fetch(`${apiUrl}/avaliacao/${user.id}/${idFilme}`, {
+        const res = await fetch(`${apiUrl}/avaliacao/delete/${user.id}/${idFilme}`, {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
@@ -121,7 +156,9 @@ export function useAvaliacoes() {
 
   return {
     avaliacoes,
+    avaliacoesUsuario,
     fetchAvaliacoesPorFilme,
+    fetchAvaliacoesPorUsuario,
     enviarAvaliacao,
     atualizarAvaliacao,
     excluirAvaliacao,

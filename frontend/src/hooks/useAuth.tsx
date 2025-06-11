@@ -1,23 +1,28 @@
 import { useEffect, useState } from "react";
-import { Usuario } from "../models/User";
+import { Usuario, TipoUsuario } from "../models/User";
 
 export const useAuth = () => {
     const [user, setUser] = useState<Usuario | null>(null);
     const [token, setToken] = useState<string | null>(null);
+    const [isAdmin, setIsAdmin] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(true); 
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
+        const storedToken = localStorage.getItem("token");
         const apiUrl = import.meta.env.VITE_API_URL;
 
-        if (token && apiUrl) {
-            setToken(token);
+        const loadUser = async () => {
+            setIsLoading(true);
 
-            fetch(`${apiUrl}/user/logado`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-                .then(async (res) => {
+            if (storedToken && apiUrl) {
+                setToken(storedToken);
+                try {
+                    const res = await fetch(`${apiUrl}/user/logado`, {
+                        headers: {
+                            Authorization: `Bearer ${storedToken}`,
+                        },
+                    });
+
                     const contentType = res.headers.get("content-type");
                     const responseText = await res.text();
 
@@ -26,33 +31,45 @@ export const useAuth = () => {
                         if (res.status === 401 || res.status === 403) {
                             localStorage.removeItem("token");
                             setUser(null);
+                            setIsAdmin(false);
                         }
-                        return;
-                    }
-
-                    if (contentType && contentType.includes("application/json")) {
+                    } else if (contentType && contentType.includes("application/json")) {
                         const data = JSON.parse(responseText);
                         if (data.nome) {
                             setUser(data);
+                            setIsAdmin(data.tipoUsuario === TipoUsuario.ADMIN);
                         }
                     } else {
                         console.error("A resposta não é válida");
                     }
-                })
-                .catch((err) => console.error("Erro ao buscar usuário:", err));
-        }
+                } catch (err) {
+                    console.error("Erro ao buscar usuário:", err);
+                    localStorage.removeItem("token");
+                    setUser(null);
+                    setIsAdmin(false);
+                } finally {
+                    setIsLoading(false);
+                }
+            } else {
+                setUser(null);
+                setIsAdmin(false);
+                setIsLoading(false);
+            }
+        };
+
+        loadUser();
     }, []);
 
     const logout = async () => {
-        const token = localStorage.getItem("token");
+        const storedToken = localStorage.getItem("token");
         const apiUrl = import.meta.env.VITE_API_URL;
 
-        if (token && apiUrl) {
+        if (storedToken && apiUrl) {
             try {
                 await fetch(`${apiUrl}/logout`, {
                     method: "POST",
                     headers: {
-                        Authorization: `Bearer ${token}`,
+                        Authorization: `Bearer ${storedToken}`,
                     },
                 });
             } catch (err) {
@@ -63,10 +80,10 @@ export const useAuth = () => {
         localStorage.removeItem("token");
         setUser(null);
         setToken(null);
+        setIsAdmin(false);
+        setIsLoading(false);
         window.location.replace("/auth");
     };
 
-
-
-    return { user, setUser, token, logout };
+    return { user, setUser, token, logout, isAdmin, isLoading };
 };

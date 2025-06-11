@@ -33,7 +33,7 @@ const FilmeCard: React.FC<FilmeCardProps> = ({ filme }) => {
           {anoLancamento} • {duracao} min
         </p>
         <p className="text-xs text-textSecondary">Diretor: {diretor}</p>
-        {<p className="text-xs text-textSecondary">Produtora: {produtora}</p>}
+        <p className="text-xs text-textSecondary">Produtora: {produtora}</p>
         <p className="text-xs text-textSecondary">Classificação: {classificacao}</p>
 
         {generos?.length > 0 && (
