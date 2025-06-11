@@ -6,12 +6,12 @@ export function useAvaliacoes() {
   const [avaliacoes, setAvaliacoes] = useState<Avaliacao[]>([]);
   const apiUrl = import.meta.env.VITE_API_URL;
 
-  const { user, token } = useAuth(); 
+  const { user, token } = useAuth();
 
   const fetchAvaliacoesPorFilme = useCallback(async (filmeId: number) => {
     try {
       const res = await fetch(`${apiUrl}/avaliacao/filme/${filmeId}`);
-      if (!res.ok) { 
+      if (!res.ok) {
         throw new Error(`Erro ao buscar avaliações: ${res.statusText}`);
       }
       const data = await res.json();
@@ -19,7 +19,7 @@ export function useAvaliacoes() {
     } catch (error) {
       console.error("Erro ao buscar avaliações:", error);
     }
-  }, [apiUrl]); 
+  }, [apiUrl]);
 
   const enviarAvaliacao = useCallback(
     async (idFilme: number, comentario: string, idUsuario: number, nota: number) => {
@@ -32,13 +32,13 @@ export function useAvaliacoes() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, 
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ idUsuario, idFilme, nota, comentario }),
       });
 
       if (!res.ok) {
-        const errorData = await res.json(); 
+        const errorData = await res.json();
         throw new Error(errorData.message || "Erro ao enviar avaliação.");
       }
 
@@ -46,7 +46,7 @@ export function useAvaliacoes() {
 
       return nova; //retorna a nova avaliação se precisar dela
     },
-    [apiUrl, token] 
+    [apiUrl, token]
   );
 
   const atualizarAvaliacao = useCallback(
@@ -82,7 +82,40 @@ export function useAvaliacoes() {
         throw error;
       }
     },
-    
+
+    [apiUrl, user, token]
+  );
+
+  const excluirAvaliacao = useCallback(
+    async (idFilme: number) => {
+      if (!user || !token) {
+        throw new Error("Usuário não autenticado. Impossível excluir avaliação.");
+      }
+      if (!apiUrl) {
+        throw new Error("URL da API não configurada.");
+      }
+
+      try {
+        const res = await fetch(`${apiUrl}/avaliacao/${user.id}/${idFilme}`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.message || "Erro ao excluir avaliação.");
+        }
+
+        return true;
+
+      } catch (error) {
+        console.error("Erro ao excluir avaliação:", error);
+        throw error;
+      }
+    },
     [apiUrl, user, token]
   );
 
@@ -91,5 +124,6 @@ export function useAvaliacoes() {
     fetchAvaliacoesPorFilme,
     enviarAvaliacao,
     atualizarAvaliacao,
+    excluirAvaliacao,
   };
 }
