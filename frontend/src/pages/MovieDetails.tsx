@@ -20,15 +20,13 @@ const MovieDetails: React.FC = () => {
     fetchAvaliacoesPorFilme,
     enviarAvaliacao,
     atualizarAvaliacao,
+    excluirAvaliacao,
   } = useAvaliacoes();
   const [comentario, setComentario] = useState("");
   const [mensagem, setMensagem] = useState("");
   const [nota, setNota] = useState<number>(0);
-
-  const [avaliacaoUsuario, setAvaliacaoUsuario] = useState<Avaliacao | null>(
-    null
-  );
-  const [isEditing, setIsEditing] = useState(false);
+  const [avaliacaoUsuario, setAvaliacaoUsuario] = useState<Avaliacao | null>(null);
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
     if (filme?.id) {
@@ -55,7 +53,6 @@ const MovieDetails: React.FC = () => {
     };
   }, [id, fetchFilmeById]);
 
-
   useEffect(() => {
     if (user && avaliacoes.length > 0) {
       const userReview = avaliacoes.find(
@@ -63,23 +60,55 @@ const MovieDetails: React.FC = () => {
       );
       if (userReview) {
         setAvaliacaoUsuario(userReview);
-        setComentario(userReview.comentario);
-        setNota(userReview.nota);
-        setIsEditing(true);
       } else {
         setAvaliacaoUsuario(null);
-        setComentario("");
-        setNota(0);
-        setIsEditing(false);
       }
     } else {
       setAvaliacaoUsuario(null);
-      setComentario("");
-      setNota(0);
-      setIsEditing(false);
     }
+    setComentario("");
+    setNota(0);
+    setShowForm(false);
   }, [avaliacoes, user]);
 
+
+  const handleEditClick = () => {
+    if (avaliacaoUsuario) {
+      setComentario(avaliacaoUsuario.comentario);
+      setNota(avaliacaoUsuario.nota);
+    } else {
+      setComentario("");
+      setNota(0);
+    }
+    setShowForm(true);
+  };
+
+  const handleCancelForm = () => {
+    setComentario("");
+    setNota(0);
+    setShowForm(false);
+    setMensagem(""); //limpa mensagem ao cancelar
+  };
+
+  const handleExcluirAvaliacao = async () => {
+    if (!filme || !user || !window.confirm("Tem certeza que deseja excluir sua avaliação?")) {
+      return;
+    }
+
+    try {
+      await excluirAvaliacao(filme.id);
+      setMensagem("Avaliação excluída com sucesso!");
+      setAvaliacaoUsuario(null);
+      setComentario(""); //limpa os campos do formulário
+      setNota(0);
+      setShowForm(false); //esconde o form
+      await fetchAvaliacoesPorFilme(filme.id); //recarrega as avaliações
+    } catch (err) {
+      setMensagem("Erro ao excluir avaliação.");
+      console.error("Erro ao excluir avaliação:", err);
+    }
+    setTimeout(() => setMensagem(""), 3000);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,22 +119,21 @@ const MovieDetails: React.FC = () => {
     }
 
     try {
-      if (isEditing && avaliacaoUsuario) {
-        //se estiver editando chama a função de atualização
+      if (avaliacaoUsuario) {
         await atualizarAvaliacao(
-          filme.id, 
+          filme.id,
           comentario,
           nota
         );
         setMensagem("Avaliação atualizada com sucesso!");
       } else {
-        //se não estiver editando envia uma nova avaliação
         await enviarAvaliacao(filme.id, comentario, user.id, nota);
         setMensagem("Avaliação enviada com sucesso!");
       }
       setComentario("");
-      setNota(0); //reseta a nota após enviar
-      await fetchAvaliacoesPorFilme(filme.id); //recarrega as avaliações para refletir a mudança
+      setNota(0);
+      setShowForm(false);
+      await fetchAvaliacoesPorFilme(filme.id);
     } catch (err) {
       setMensagem("Erro ao enviar/atualizar avaliação.");
       console.error("Erro na avaliação:", err);
@@ -133,9 +161,8 @@ const MovieDetails: React.FC = () => {
     );
 
   const avaliacoesOrdenadas = avaliacoes
-    .filter((avaliacao) => avaliacao.usuario.id !== user?.id)
+    .filter((avaliacao) => avaliacao.usuario.id !== user?.id);
 
-  //se usuario tiver avaliação coloca ela no início da lista
   const avaliacoesParaExibir = avaliacaoUsuario
     ? [avaliacaoUsuario, ...avaliacoesOrdenadas]
     : avaliacoesOrdenadas;
@@ -145,7 +172,7 @@ const MovieDetails: React.FC = () => {
       <Header />
 
       <main className="flex-1 flex flex-col items-center justify-start w-full p-6">
-        {/*informações do filme */}
+
         <section className="w-full max-w-5xl bg-tertiary rounded-xl shadow-lg text-textPrimary p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <img
@@ -193,17 +220,57 @@ const MovieDetails: React.FC = () => {
           </div>
         </section>
 
-        {/*formulário de avaliação*/}
-        {user ? (
+        <section className="w-full max-w-5xl rounded-xl shadow-lg text-textPrimary p-6">
+          <h2 className="text-2xl font-bold mb-4">Avaliações</h2>
+          {avaliacoesParaExibir.length > 0 ? (
+            <div className="space-y-4">
+              {avaliacoesParaExibir.map((avaliacao) => (
+                <div
+                  key={avaliacao.id}
+                  className="border-b pb-2 last:border-none flex justify-between items-start"
+                >
+                  <div>
+                    <p className="font-semibold">{avaliacao.usuario.nome}</p>
+                    <p className="font-semibold">Nota: {avaliacao.nota}</p>
+                    <p className="text-sm">{avaliacao.comentario}</p>
+                  </div>
+
+                  {user && avaliacao.usuario.id === user.id && (
+                    <div className="flex gap-2 mt-1 md:mt-0">
+
+                      <Button onClick={handleEditClick} className="px-3 py-1 text-sm bg-blue-500 hover:bg-blue-700">
+                        Editar
+                      </Button>
+
+                      <Button onClick={handleExcluirAvaliacao} className="px-3 py-1 text-sm bg-red-500 hover:bg-red-700">
+                        Excluir
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-600">Nenhuma avaliação ainda.</p>
+          )}
+        </section>
+
+        {user && !avaliacaoUsuario && !showForm && (
+          <section className="w-full max-w-5xl text-center mt-6">
+            <Button onClick={handleEditClick}>
+              Adicionar sua Avaliação
+            </Button>
+          </section>
+        )}
+
+        {user && showForm && (
           <section className="w-full max-w-5xl rounded-xl shadow-lg p-6 mt-6">
             <h2 className="text-xl font-bold mb-4">
-              {isEditing ? "Edite sua avaliação" : "Deixe sua avaliação"}
+              {avaliacaoUsuario ? "Edite sua avaliação" : "Deixe sua avaliação"}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">
-                  Nota (0 a 5)
-                </label>
+                <label className="block text-sm font-medium mb-1">Nota (0 a 5)</label>
                 <input
                   type="number"
                   min={0}
@@ -211,7 +278,7 @@ const MovieDetails: React.FC = () => {
                   step={0.5}
                   value={nota}
                   onChange={(e) => setNota(parseFloat(e.target.value))}
-                  className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-primary text-black" // Adicionei 'text-black' para garantir a cor do texto do input
+                  className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-primary text-black"
                   required
                 />
               </div>
@@ -222,12 +289,17 @@ const MovieDetails: React.FC = () => {
                 value={comentario}
                 onChange={(e) => setComentario(e.target.value)}
                 placeholder="Escreva seu comentário sobre o filme..."
-                className="w-full border border-gray-300 rounded-md p-3 resize-none focus:outline-none focus:ring-2 focus:ring-primary text-black" // Adicionei 'text-black'
+                className="w-full border border-gray-300 rounded-md p-3 resize-none focus:outline-none focus:ring-2 focus:ring-primary text-black"
                 rows={4}
               />
-              <Button type="submit">
-                {isEditing ? "Atualizar Avaliação" : "Enviar Avaliação"}
-              </Button>
+              <div className="flex gap-4">
+                <Button type="submit">
+                  {avaliacaoUsuario ? "Atualizar Avaliação" : "Enviar Avaliação"}
+                </Button>
+                <Button type="button" onClick={handleCancelForm} className="bg-gray-500 hover:bg-gray-700">
+                  Cancelar
+                </Button>
+              </div>
 
               {mensagem && (
                 <p className="text-sm mt-2 text-center text-red-600">
@@ -236,35 +308,15 @@ const MovieDetails: React.FC = () => {
               )}
             </form>
           </section>
-        ) : (
+        )}
+
+        {!user && (
           <div className="w-full max-w-5xl text-textPrimary mt-6 text-center">
             <p>
               <strong>Faça login</strong> para deixar sua avaliação.
             </p>
           </div>
         )}
-
-        {/*seção de avaliações */}
-        <section className="w-full max-w-5xl rounded-xl shadow-lg text-textPrimary p-6 mt-6">
-          <h2 className="text-2xl font-bold mb-4">Avaliações</h2>
-
-          {avaliacoesParaExibir.length > 0 ? (
-            <div className="space-y-4">
-              {avaliacoesParaExibir.map((avaliacao) => (
-                <div
-                  key={avaliacao.id}
-                  className="border-b pb-2 last:border-none"
-                >
-                  <p className="font-semibold">{avaliacao.usuario.nome}</p>
-                  <p className="font-semibold">{avaliacao.nota}</p>
-                  <p className="text-sm">{avaliacao.comentario}</p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-gray-600">Nenhuma avaliação ainda.</p>
-          )}
-        </section>
       </main>
 
       <Footer />

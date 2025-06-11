@@ -57,6 +57,11 @@ export class FilmeRepository {
             generos: filme.generos.map(gf => gf.genero)
         };
     }
+    async deleteAvaliacoesByFilmeId(idFilme: number) {
+        return prisma.avaliacao.deleteMany({
+            where: { idFilme: idFilme }
+        });
+    }
 
     async deleteFilme(id: number) {
         return prisma.filme.delete({ where: { id } });
