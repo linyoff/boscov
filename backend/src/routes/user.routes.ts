@@ -54,15 +54,31 @@ router.get("/logado", authenticateToken, async (req: Request, res: Response) => 
 });
 
 router.put("/update/:id", authenticateToken, async (req: Request, res: Response) => {
-    try {
-      await userController.update(req, res);
-    } catch (error) {
-      console.error(error);
-    }
+  try {
+    await userController.update(req, res);
+  } catch (error) {
+    console.error(error);
   }
+}
 );
 
+// router.get("/", authenticateToken, isAdminMiddleware, async (req: Request, res: Response) => {
+//   try {
+//     await userController.getAllUsers(req, res); 
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Erro ao buscar usuários." });
+//   }
+// });
 
+// router.delete("/delete/:id", authenticateToken, isAdminMiddleware, async (req: Request, res: Response) => {
+//   try {
+//     await userController.deleteUser(req, res);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Erro ao deletar usuário." });
+//   }
+// });
 
 export default router;
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'; 
+import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Button from '../components/CustomButton';
@@ -10,8 +10,8 @@ const AddGenre: React.FC = () => {
     const [mensagem, setMensagem] = useState<string | null>(null);
     const { createGenero, fetchAllGeneros, updateGenero, deleteGenero, loading, error } = useGeneros();
 
-    const [generos, setGeneros] = useState<Genero[]>([]); 
-    const [editingGenre, setEditingGenre] = useState<Genero | null>(null); 
+    const [generos, setGeneros] = useState<Genero[]>([]);
+    const [editingGenre, setEditingGenre] = useState<Genero | null>(null);
 
     useEffect(() => {
         const loadGeneros = async () => {
@@ -21,7 +21,7 @@ const AddGenre: React.FC = () => {
             }
         };
         loadGeneros();
-    }, [fetchAllGeneros]); 
+    }, [fetchAllGeneros]);
 
     const refreshGeneros = async () => {
         const fetchedGeneros = await fetchAllGeneros();
@@ -44,8 +44,8 @@ const AddGenre: React.FC = () => {
                 const updatedGenre = await updateGenero(editingGenre.id, descricao);
                 if (updatedGenre) {
                     setMensagem(`Gênero "${updatedGenre.descricao}" atualizado com sucesso!`);
-                    setEditingGenre(null); 
-                    setDescricao(''); 
+                    setEditingGenre(null);
+                    setDescricao('');
                     await refreshGeneros();
                 } else if (error) {
                     setMensagem(`Erro ao atualizar: ${error}`);
@@ -88,7 +88,7 @@ const AddGenre: React.FC = () => {
             const success = await deleteGenero(id);
             if (success) {
                 setMensagem(`Gênero "${descricaoGenero}" excluído com sucesso!`);
-                await refreshGeneros(); 
+                await refreshGeneros();
             } else if (error) {
                 setMensagem(`Erro ao excluir: ${error}`);
             }
@@ -99,9 +99,9 @@ const AddGenre: React.FC = () => {
     };
 
     return (
-        <div className="flex flex-col min-h-screen bg-primary text-textPrimary">
+        <div className="flex flex-col min-h-screen bg-primary text-primary">
             <Header />
-            <main className="flex-1 p-6 max-w-2xl mx-auto w-full"> 
+            <main className="flex-1 p-6 max-w-2xl mx-auto w-full">
                 <h1 className="text-3xl font-bold mb-8 text-center">Gerenciar Gêneros</h1>
 
                 {/*formu de add/update*/}
@@ -159,7 +159,7 @@ const AddGenre: React.FC = () => {
                     ) : generos.length === 0 ? (
                         <p className="text-center text-textSecondary">Nenhum gênero cadastrado ainda.</p>
                     ) : (
-                        <div className="overflow-x-auto"> 
+                        <div className="overflow-x-auto">
                             <table className="min-w-full bg-white text-black rounded-lg overflow-hidden">
                                 <thead className="bg-gray-200">
                                     <tr>

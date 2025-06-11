@@ -8,6 +8,8 @@ import Avaliacoes from "../pages/Avaliacoes";
 import AdminRoute from "../components/AdminRoute";
 import AdminDashboard from "../pages/AdminDashboard";
 import AddGenre from "../pages/AddGenre";
+import AddUser from "../pages/AddUser";
+import AddMovies from "../pages/AddMovies";
 
 
 export default function AppRoutes() {
@@ -22,8 +24,8 @@ export default function AppRoutes() {
 
             <Route path="/admin" element={<AdminRoute />}>
                 <Route index element={<AdminDashboard />} />
-                {/* <Route path="add-usuario" element={<AddUser />} />
-                <Route path="add-filme" element={<AddMovie />} /> */}
+                <Route path="add-usuario" element={<AddUser />} />
+                <Route path="add-filme" element={<AddMovies />} />
                 <Route path="add-genero" element={<AddGenre />} />
             </Route>
         </Routes>
