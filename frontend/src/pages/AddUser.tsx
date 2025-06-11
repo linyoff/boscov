@@ -81,7 +81,7 @@ const AddUser: React.FC = () => {
 
             const newUser = await createUser(userData);
             if (newUser) {
-                setMensagem(`Usuário "${newUser.nome}" (${newUser.email}) adicionado com sucesso!`);
+                setMensagem(`Usuário adicionado com sucesso!`);
                 //limpar form após sucesso
                 setNome('');
                 setApelido('');
@@ -102,14 +102,14 @@ const AddUser: React.FC = () => {
     };
 
     const handleDeleteClick = async (id: number, nomeUsuario: string) => {
-        if (!window.confirm(`Tem certeza que deseja excluir o usuário "${nomeUsuario}"?`)) {
+        if (!window.confirm(`Tem certeza que deseja excluir o usuário?`)) {
             return;
         }
         setMensagem(null);
         try {
             const success = await deleteUser(id);
             if (success) {
-                setMensagem(`Usuário "${nomeUsuario}" excluído com sucesso!`);
+                setMensagem(`Usuário excluído com sucesso!`);
                 await refreshUsers();
             } else if (formError) {
                 setMensagem(`Erro ao excluir: ${formError}`);
@@ -203,48 +203,6 @@ const AddUser: React.FC = () => {
                             </p>
                         )}
                     </form>
-                </section>
-
-                {/*lista de usuarios*/}
-                <section className="bg-tertiary p-6 rounded-lg shadow-md">
-                    <h2 className="text-2xl font-bold mb-4">Usuários Cadastrados</h2>
-                    {listLoading ? (
-                        <p className="text-center text-textSecondary">Carregando usuários...</p>
-                    ) : users.length === 0 ? (
-                        <p className="text-center text-textSecondary">Nenhum usuário cadastrado ainda.</p>
-                    ) : (
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full bg-white text-black rounded-lg overflow-hidden">
-                                <thead className="bg-gray-200">
-                                    <tr>
-                                        <th className="py-2 px-4 text-left text-sm font-semibold">ID</th>
-                                        <th className="py-2 px-4 text-left text-sm font-semibold">Nome</th>
-                                        <th className="py-2 px-4 text-left text-sm font-semibold">Email</th>
-                                        <th className="py-2 px-4 text-left text-sm font-semibold">Tipo</th>
-                                        <th className="py-2 px-4 text-center text-sm font-semibold">Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {users.map((userItem) => (
-                                        <tr key={userItem.id} className="border-b border-gray-200 last:border-none">
-                                            <td className="py-2 px-4 text-sm">{userItem.id}</td>
-                                            <td className="py-2 px-4 text-sm">{userItem.nome} ({userItem.apelido})</td>
-                                            <td className="py-2 px-4 text-sm">{userItem.email}</td>
-                                            <td className="py-2 px-4 text-sm">{userItem.tipoUsuario}</td>
-                                            <td className="py-2 px-4 text-center">
-                                                <Button
-                                                    onClick={() => handleDeleteClick(userItem.id, userItem.nome)}
-                                                    className="px-3 py-1 text-xs bg-red-500 hover:bg-red-600"
-                                                >
-                                                    Excluir
-                                                </Button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
                 </section>
             </main>
             <Footer />

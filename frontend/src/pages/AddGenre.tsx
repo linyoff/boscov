@@ -43,7 +43,7 @@ const AddGenre: React.FC = () => {
             if (editingGenre) {
                 const updatedGenre = await updateGenero(editingGenre.id, descricao);
                 if (updatedGenre) {
-                    setMensagem(`Gênero "${updatedGenre.descricao}" atualizado com sucesso!`);
+                    setMensagem(`Gênero atualizado com sucesso!`);
                     setEditingGenre(null);
                     setDescricao('');
                     await refreshGeneros();
@@ -53,7 +53,7 @@ const AddGenre: React.FC = () => {
             } else {
                 const newGenre = await createGenero(descricao);
                 if (newGenre) {
-                    setMensagem(`Gênero "${newGenre.descricao}" adicionado com sucesso!`);
+                    setMensagem(`Gênero adicionado com sucesso!`);
                     setDescricao('');
                     await refreshGeneros();
                 } else if (error) {
@@ -80,14 +80,14 @@ const AddGenre: React.FC = () => {
     };
 
     const handleDeleteClick = async (id: number, descricaoGenero: string) => {
-        if (!window.confirm(`Tem certeza que deseja excluir o gênero "${descricaoGenero}"?`)) {
+        if (!window.confirm(`Tem certeza que deseja excluir esse gênero?`)) {
             return;
         }
         setMensagem(null);
         try {
             const success = await deleteGenero(id);
             if (success) {
-                setMensagem(`Gênero "${descricaoGenero}" excluído com sucesso!`);
+                setMensagem(`Gênero excluído com sucesso!`);
                 await refreshGeneros();
             } else if (error) {
                 setMensagem(`Erro ao excluir: ${error}`);
@@ -104,7 +104,7 @@ const AddGenre: React.FC = () => {
             <main className="flex-1 p-6 max-w-2xl mx-auto w-full">
                 <h1 className="text-3xl font-bold mb-8 text-center">Gerenciar Gêneros</h1>
 
-                {/*formu de add/update*/}
+                {/*form de add/update*/}
                 <section className="bg-tertiary p-6 rounded-lg shadow-md mb-8">
                     <h2 className="text-2xl font-bold mb-4">
                         {editingGenre ? 'Editar Gênero' : 'Adicionar Novo Gênero'}

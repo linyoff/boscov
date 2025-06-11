@@ -1,4 +1,5 @@
 import app from "./app";
+import 'dotenv/config'; 
 import users from "./routes/user.routes"
 import filmes from "./routes/filme.routes"
 import generos from "./routes/genero.routes"
