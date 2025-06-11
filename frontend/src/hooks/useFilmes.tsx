@@ -1,6 +1,5 @@
 import { useCallback, useState, useEffect } from "react";
 import { Filme } from "../models/Filme";
-import { useAuth } from './useAuth';
 
 export function useFilmes() {
   const [filmes, setFilmes] = useState<Filme[]>([]);
@@ -8,16 +7,11 @@ export function useFilmes() {
   const [error, setError] = useState<string | null>(null);
   const apiUrl = import.meta.env.VITE_API_URL;
 
-  const { token } = useAuth();
-
   const fetchAllFilmes = useCallback(async (): Promise<Filme[] | null> => {
     setLoading(true);
     setError(null);
     try {
       const headers: HeadersInit = { 'Content-Type': 'application/json' };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
 
       const response = await fetch(`${apiUrl}/filme`, { headers });
       if (!response.ok) {
@@ -34,7 +28,7 @@ export function useFilmes() {
     } finally {
       setLoading(false);
     }
-  }, [apiUrl, token]);
+  }, [apiUrl]);
 
   useEffect(() => {
     fetchAllFilmes();
@@ -61,21 +55,17 @@ export function useFilmes() {
     }
   }, [apiUrl]);
 
+
   const createFilme = useCallback(async (filmeData: Omit<Filme, 'id' | 'createdAt' | 'updatedAt' | 'generos'>, generosIds: number[]): Promise<Filme | null> => {
     setLoading(true);
     setError(null);
     try {
-      if (!token) {
-        throw new Error("Usuário não autenticado. Faça login como admin para adicionar um filme.");
-      }
 
       const response = await fetch(`${apiUrl}/filme/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
-
         body: JSON.stringify({ ...filmeData, generos: generosIds }),
       });
 
@@ -93,22 +83,16 @@ export function useFilmes() {
     } finally {
       setLoading(false);
     }
-  }, [apiUrl, token]);
-
+  }, [apiUrl]); 
 
   const updateFilme = useCallback(async (id: number, filmeData: Omit<Filme, 'id' | 'createdAt' | 'updatedAt' | 'generos'>, generosIds: number[]): Promise<Filme | null> => {
     setLoading(true);
     setError(null);
     try {
-      if (!token) {
-        throw new Error("Usuário não autenticado. Faça login como admin para atualizar um filme.");
-      }
-
-      const response = await fetch(`${apiUrl}/filme/update/${id}`, {
+     const response = await fetch(`${apiUrl}/filme/update/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ ...filmeData, generos: generosIds }),
       });
@@ -127,21 +111,16 @@ export function useFilmes() {
     } finally {
       setLoading(false);
     }
-  }, [apiUrl, token]);
+  }, [apiUrl]); 
 
 
   const deleteFilme = useCallback(async (id: number): Promise<boolean> => {
     setLoading(true);
     setError(null);
     try {
-      if (!token) {
-        throw new Error("Usuário não autenticado. Faça login como admin para deletar um filme.");
-      }
-
-      const response = await fetch(`${apiUrl}/filme/delete/${id}`, {
+const response = await fetch(`${apiUrl}/filme/delete/${id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${token}`,
         },
       });
 
@@ -158,7 +137,7 @@ export function useFilmes() {
     } finally {
       setLoading(false);
     }
-  }, [apiUrl, token]);
+  }, [apiUrl]); 
 
 
   return { filmes, loading, error, fetchFilmeById, fetchAllFilmes, createFilme, updateFilme, deleteFilme };

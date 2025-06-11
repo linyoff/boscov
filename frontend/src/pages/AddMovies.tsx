@@ -165,7 +165,7 @@ const AddMovies: React.FC = () => {
     };
 
     return (
-        <div className="flex flex-col min-h-screen bg-primary text-textPrimary">
+        <div className="flex flex-col min-h-screen bg-primary text-primary">
             <Header />
             <main className="flex-1 p-6 max-w-7xl mx-auto w-full">
                 <h1 className="text-3xl font-bold mb-8 text-center">Gerenciar Filmes</h1>
