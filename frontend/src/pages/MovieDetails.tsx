@@ -27,12 +27,25 @@ const MovieDetails: React.FC = () => {
   const [nota, setNota] = useState<number>(0);
   const [avaliacaoUsuario, setAvaliacaoUsuario] = useState<Avaliacao | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [mediaNotas, setMediaNotas] = useState<string | null>(null);
 
   useEffect(() => {
     if (filme?.id) {
       fetchAvaliacoesPorFilme(filme.id);
     }
   }, [filme?.id, fetchAvaliacoesPorFilme]);
+
+  //calcular a média sempre que as avaliações mudam
+  useEffect(() => {
+    if (avaliacoes.length > 0) {
+      const totalNotas = avaliacoes.reduce((sum, avaliacao) => sum + avaliacao.nota, 0);
+      const media = totalNotas / avaliacoes.length;
+      setMediaNotas(media.toFixed(1));
+    } else {
+      setMediaNotas(null);
+    }
+  }, [avaliacoes]);
+
 
   useEffect(() => {
     let isMounted = true;
@@ -69,6 +82,7 @@ const MovieDetails: React.FC = () => {
     setComentario("");
     setNota(0);
     setShowForm(false);
+    setMensagem(""); //limpa mensagem ao cancelar
   }, [avaliacoes, user]);
 
 
@@ -87,7 +101,7 @@ const MovieDetails: React.FC = () => {
     setComentario("");
     setNota(0);
     setShowForm(false);
-    setMensagem(""); //limpa mensagem ao cancelar
+    setMensagem("");
   };
 
   const handleExcluirAvaliacao = async () => {
@@ -99,10 +113,10 @@ const MovieDetails: React.FC = () => {
       await excluirAvaliacao(filme.id);
       setMensagem("Avaliação excluída com sucesso!");
       setAvaliacaoUsuario(null);
-      setComentario(""); //limpa os campos do formulário
+      setComentario("");
       setNota(0);
-      setShowForm(false); //esconde o form
-      await fetchAvaliacoesPorFilme(filme.id); //recarrega as avaliações
+      setShowForm(false);
+      await fetchAvaliacoesPorFilme(filme.id);
     } catch (err) {
       setMensagem("Erro ao excluir avaliação.");
       console.error("Erro ao excluir avaliação:", err);
@@ -172,7 +186,7 @@ const MovieDetails: React.FC = () => {
       <Header />
 
       <main className="flex-1 flex flex-col items-center justify-start w-full p-6">
-
+        {/* Informações do filme */}
         <section className="w-full max-w-5xl bg-tertiary rounded-xl shadow-lg text-textPrimary p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <img
@@ -183,6 +197,12 @@ const MovieDetails: React.FC = () => {
 
             <div className="flex flex-col justify-center">
               <h1 className="text-3xl font-bold mb-4">{filme.nome}</h1>
+              {/*media das notas*/}
+              {mediaNotas !== null && (
+                  <p className="text-xl font-bold mb-2">
+                      ⭐ Média: <span className="text-secondary">{mediaNotas}</span> / 5 ({avaliacoes.length} avaliações)
+                  </p>
+              )}
               <p className="text-sm mb-1">
                 <strong>Ano de Lançamento:</strong> {filme.anoLancamento}
               </p>
@@ -220,6 +240,7 @@ const MovieDetails: React.FC = () => {
           </div>
         </section>
 
+        {/*avaliações*/}
         <section className="w-full max-w-5xl rounded-xl shadow-lg text-textPrimary p-6">
           <h2 className="text-2xl font-bold mb-4">Avaliações</h2>
           {avaliacoesParaExibir.length > 0 ? (
@@ -237,11 +258,9 @@ const MovieDetails: React.FC = () => {
 
                   {user && avaliacao.usuario.id === user.id && (
                     <div className="flex gap-2 mt-1 md:mt-0">
-
                       <Button onClick={handleEditClick} className="px-3 py-1 text-sm bg-blue-500 hover:bg-blue-700">
                         Editar
                       </Button>
-
                       <Button onClick={handleExcluirAvaliacao} className="px-3 py-1 text-sm bg-red-500 hover:bg-red-700">
                         Excluir
                       </Button>
@@ -263,6 +282,7 @@ const MovieDetails: React.FC = () => {
           </section>
         )}
 
+        {/*form de avaliação/edição*/}
         {user && showForm && (
           <section className="w-full max-w-5xl rounded-xl shadow-lg p-6 mt-6">
             <h2 className="text-xl font-bold mb-4">
